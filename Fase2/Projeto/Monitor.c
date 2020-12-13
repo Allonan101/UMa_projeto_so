@@ -12,7 +12,6 @@
 
 
 //Variaveis globais
-int escolha_menu;
 const char file_name[] = "Relatorio.txt";
 
 
@@ -59,13 +58,24 @@ void client_socket(){
 	}
 	
 	puts("Conectado\n");
+
 	
 	//Loop de comunicação com o simulador
 	while(1)
 	{
 
-		printf("Enter message : ");
+		printf("1 - Iniciar a simulacao \n"
+		"2 - Continuar a simulacao \n"
+		"3 - Pausar a simulacao \n"
+		"4 - Imprimir os resultados \n"
+		"5 - Terminar a simulacao \n");
+
 		scanf("%s" , message);
+
+		int x = atoi(message);
+		
+		menu(x);
+
 
 		//Envio de dados
 		if( send(sock , message , strlen(message) , 0) < 0)
@@ -81,7 +91,7 @@ void client_socket(){
 			break;
 		}
 		
-		puts("Server reply :");
+		puts("Resposta do simulador :");
 		puts(server_reply);
 	}
 	
@@ -89,52 +99,35 @@ void client_socket(){
 	return 0;
 }
 
-void menu(){ //menu de comandos
-	printf("1 - Iniciar a simulacao \n"
-		"2 - Continuar a simulacao \n"
-		"3 - Pausar a simulacao \n"
-		"4 - Imprimir os resultados \n"
-		"5 - Terminar a simulacao \n");
-	
-	scanf("%d",escolha_menu);
-	switch (escolha_menu) { 
+void menu(x){
+	printf("%d",x);
+	switch (x) { 
 		case 1: { 
 			printf("\nIniciando a simulacao \n");
-			break; 
+			break;
 		} 
 
 		case 2: { 
 			printf("\nContinuando a simulacao \n");
-			system("pause");
-			break; 
+			
 		} 
 		case 3: { 
 			printf("\nPausando a simulacao \n");
-			system("pause");
-			return 1; 
+
 		} 
 		case 4: { 
 			printf("\nImprimindo o resultados \n");
-			system("pause");
-			return 1; 
+
 		} 
 		case 5: { 
 			printf("\nTerminando a simulacao \n");
-			system("pause");
-			return 1; 
-		} 
-
-		default: 
-			menu();
-		} 
-
+	
+		}
+	} 
 }
-
-
 
 int main(int argc , char *argv[]){ 
 	client_socket();
-	menu();
 }
 
 
