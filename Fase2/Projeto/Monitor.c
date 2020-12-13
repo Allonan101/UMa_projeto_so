@@ -14,8 +14,11 @@
 //Variaveis globais
 const char file_name[] = "Relatorio.txt";
 
+void load_conf_monitor(){
 
-void lerficheiro(){
+}
+
+void lerficheiro(){ 
 	int ficheiro;
 	char output[50];
 	ficheiro = open(file_name, O_RDONLY);
@@ -76,7 +79,6 @@ void client_socket(){
 		
 		menu(x);
 
-
 		//Envio de dados
 		if( send(sock , message , strlen(message) , 0) < 0)
 		{
@@ -87,7 +89,7 @@ void client_socket(){
 		//Resposta do simulador
 		if( recv(sock , server_reply , 2000 , 0) < 0)
 		{
-			puts("recv failed");
+			puts("recv falhou");
 			break;
 		}
 		
@@ -117,6 +119,7 @@ void menu(x){
 		} 
 		case 4: { 
 			printf("\nImprimindo o resultados \n");
+			lerficheiro();
 
 		} 
 		case 5: { 
