@@ -3,10 +3,12 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-#include <unistd.h>
 #include <string.h>	//strlen
-#include <sys/socket.h>	//socket
+#include <stdlib.h>	//strlen
+#include <sys/socket.h>
 #include <arpa/inet.h>	//inet_addr
+#include <unistd.h>	//write
+#include <pthread.h> //for threading , link with lpthread
 
 
 //Variaveis globais
@@ -30,52 +32,6 @@ void lerficheiro(){
 		printf("Erro no acesso ao ficheiro\n");
 		exit(0);
 	}
-}
-
-
-
-
-void menu(&escolha_menu){
-
-	printf("1 - Iniciar a simulacao \n"
-		"2 - Continuar a simulacao \n"
-		"3 - Pausar a simulacao \n"
-		"4 - Imprimir os resultados \n"
-		"5 - Terminar a simulacao \n");
-	
-	scanf("%d",escolha_menu);
-	switch (escolha_menu) { 
-		case 1: { 
-			printf("\nIniciando a simulacao \n");
-			client_socket();
-			break; 
-		} 
-
-		case 2: { 
-			printf("\nContinuando a simulacao \n");
-			system("pause");
-			break; 
-		} 
-		case 3: { 
-			printf("\nPausando a simulacao \n");
-			system("pause");
-			return 1; 
-		} 
-		case 4: { 
-			printf("\nImprimindo o resultados \n");
-			system("pause");
-			return 1; 
-		} 
-		case 5: { 
-			printf("\nTerminando a simulacao \n");
-			system("pause");
-			return 1; 
-		} 
-
-		default: 
-			menu(escolha_menu);
-		} 
-
 }
 
 void client_socket(){
@@ -108,15 +64,8 @@ void client_socket(){
 	while(1)
 	{
 
-		printf("Enter escolha : ");
-		scanf("%s" , &message);
-		
-		if(menu(&message)) == 1){
-			continue;
-		}
-		else(){
-			break;
-		}
+		printf("Enter message : ");
+		scanf("%s" , message);
 
 		//Envio de dados
 		if( send(sock , message , strlen(message) , 0) < 0)
@@ -140,10 +89,52 @@ void client_socket(){
 	return 0;
 }
 
-int main(void){ //menu de comandos
+void menu(){ //menu de comandos
+	printf("1 - Iniciar a simulacao \n"
+		"2 - Continuar a simulacao \n"
+		"3 - Pausar a simulacao \n"
+		"4 - Imprimir os resultados \n"
+		"5 - Terminar a simulacao \n");
 	
-	menu(&escolha_menu);
+	scanf("%d",escolha_menu);
+	switch (escolha_menu) { 
+		case 1: { 
+			printf("\nIniciando a simulacao \n");
+			break; 
+		} 
 
+		case 2: { 
+			printf("\nContinuando a simulacao \n");
+			system("pause");
+			break; 
+		} 
+		case 3: { 
+			printf("\nPausando a simulacao \n");
+			system("pause");
+			return 1; 
+		} 
+		case 4: { 
+			printf("\nImprimindo o resultados \n");
+			system("pause");
+			return 1; 
+		} 
+		case 5: { 
+			printf("\nTerminando a simulacao \n");
+			system("pause");
+			return 1; 
+		} 
+
+		default: 
+			menu();
+		} 
+
+}
+
+
+
+int main(int argc , char *argv[]){ 
+	client_socket();
+	menu();
 }
 
 
