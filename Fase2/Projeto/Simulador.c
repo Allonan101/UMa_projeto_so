@@ -9,11 +9,14 @@
 #include <unistd.h>	
 
 
-void load_conf_simulador(){
-
+void load_conf_simulador(){ //Load do ficheiro de configuracao_simul.conf para listas
+	
 }
 
+void cria_evento(){
 
+
+}
 void escreve_relatorio(char* input){ //Escrever para o ficheiro
 
 	FILE *ficheiro = fopen("Relatorio.txt", "a");
@@ -42,7 +45,7 @@ void criasocket(){
 	{
 		printf("Não foi possivel criar o socket");
 	}
-	puts("Socket created");
+	puts("Socket criado");
 
 	//Preparar sockaddr_in na estrutura
 	server.sin_family = AF_INET;
@@ -72,18 +75,45 @@ void criasocket(){
 	}
 	puts("Conexão aceite");
 
+	
+
 	//Receber mensagem do cliente
 	while( (read_size = recv(client_sock , client_message , 2000 , 0)) > 0 )
 	{	
 		escreve_relatorio(client_message);
 
+		int evento = atoi(client_message);
+
+		switch(evento){
+			case 1: {
+				//Iniciar simulação
+				//Função para gerar aleatoriamente um ou mais utentes com threads incluindo os atributos gerados pelo ficheiro de configuração
+				//Função para gerar eventos
+			}
+
+			case 2: {
+				//Continuar a simulacao 
+			}
+			case 3: {
+				//Pausar a simulacao 
+			}
+			case 5: {
+				//Terminar a simulacao
+			}
+		}
+
 		//Enviar mensagem de volta ao cliente
 		write(client_sock , client_message , strlen(client_message));
+
+		//----------------Comunicação-------------------
+		
+		
+
 	}
 	
 	if(read_size == 0)
 	{
-		puts("Client disconnected");
+		puts("Cliente desconectou");
 		fflush(stdout);
 	}
 	else if(read_size == -1)

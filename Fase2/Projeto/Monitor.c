@@ -111,20 +111,21 @@ void menu(x){
 
 		case 2: { 
 			printf("\nContinuando a simulacao \n");
-			
+			break;
 		} 
 		case 3: { 
 			printf("\nPausando a simulacao \n");
-
+			break;
 		} 
 		case 4: { 
 			printf("\nImprimindo o resultados \n");
 			lerficheiro();
+			break;
 
 		} 
 		case 5: { 
 			printf("\nTerminando a simulacao \n");
-	
+			break;
 		}
 	} 
 }
