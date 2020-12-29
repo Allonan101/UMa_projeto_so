@@ -17,23 +17,9 @@ void cria_evento(){
 
 
 }
-void escreve_relatorio(char* input){ //Escrever para o ficheiro
 
-	FILE *ficheiro = fopen("Relatorio.txt", "a");
-
-	if (ficheiro == NULL){
-		printf("Erro ao abrir ficheiro\n");
-		exit(-1);
-	}
-
-	fprintf(ficheiro, "%s\n", input);
-	fclose(ficheiro);
-
-}
 
 void criasocket(){
-	
-	remove ("Relatorio.txt");
 
 	int socket_desc , client_sock , c , read_size;
 	struct sockaddr_in server , client;
@@ -80,7 +66,6 @@ void criasocket(){
 	//Receber mensagem do cliente
 	while( (read_size = recv(client_sock , client_message , 2000 , 0)) > 0 )
 	{	
-		escreve_relatorio(client_message);
 
 		int evento = atoi(client_message);
 
@@ -102,8 +87,9 @@ void criasocket(){
 			}
 		}
 
+
 		//Enviar mensagem de volta ao cliente
-		write(client_sock , client_message , strlen(client_message));
+		write(client_sock , client_message , strlen(client_message)+1);
 
 		//----------------Comunicação-------------------
 		
@@ -121,7 +107,7 @@ void criasocket(){
 		perror("recv falhou");
 	}
 
-		return 0;
+	return 0;
 
 }
 int main(int argc , char *argv[]) { 

@@ -36,6 +36,20 @@ void lerficheiro(){
 	}
 }
 
+void escreve_relatorio(char* input){ //Escrever para o ficheiro
+
+	FILE *ficheiro = fopen("Relatorio.txt", "a");
+
+	if (ficheiro == NULL){
+		printf("Erro ao abrir ficheiro\n");
+		exit(-1);
+	}
+
+	fprintf(ficheiro, "%s\n", input);
+	fclose(ficheiro);
+
+}
+
 void client_socket(){
 	int sock;
 	struct sockaddr_in server;
@@ -61,7 +75,11 @@ void client_socket(){
 	}
 	
 	puts("Conectado\n");
+	puts("Apagando o relatorio anterior...");
+	remove("Relatorio.txt");
 
+	char mensagem_de_envio[20] = "Enviado:";
+	char mensagem_do_simulador[20] = "Recebido:";
 	
 	//Loop de comunicação com o simulador
 	while(1)
@@ -75,12 +93,14 @@ void client_socket(){
 
 		scanf("%s" , message);
 
+		escreve_relatorio(mensagem_de_envio);
+		escreve_relatorio(message);
+
 		int x = atoi(message);
-		
 		menu(x);
 
 		//Envio de dados
-		if( send(sock , message , strlen(message) , 0) < 0)
+		if( send(sock , message , strlen(message)+1 , 0) < 0)
 		{
 			puts("Falha ao enviar");
 			return 1;
@@ -93,6 +113,9 @@ void client_socket(){
 			break;
 		}
 		
+		escreve_relatorio(mensagem_do_simulador);
+		escreve_relatorio(server_reply);
+
 		puts("Resposta do simulador :");
 		puts(server_reply);
 	}
