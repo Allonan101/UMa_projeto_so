@@ -50,6 +50,35 @@ void escreve_relatorio(char* input){ //Escrever para o ficheiro
 
 }
 
+void menu(x){
+	printf("%d",x);
+	switch (x) { 
+		case 1: { 
+			printf("\nIniciando a simulacao \n");
+			break;
+		} 
+
+		case 2: { 
+			printf("\nContinuando a simulacao \n");
+			break;
+		} 
+		case 3: { 
+			printf("\nPausando a simulacao \n");
+			break;
+		} 
+		case 4: { 
+			printf("\nImprimindo o resultados \n");
+			lerficheiro();
+			break;
+
+		} 
+		case 5: { 
+			printf("\nTerminando a simulacao \n");
+			break;
+		}
+	} 
+}
+
 void client_socket(){
 	int sock;
 	struct sockaddr_in server;
@@ -124,34 +153,6 @@ void client_socket(){
 	return 0;
 }
 
-void menu(x){
-	printf("%d",x);
-	switch (x) { 
-		case 1: { 
-			printf("\nIniciando a simulacao \n");
-			break;
-		} 
-
-		case 2: { 
-			printf("\nContinuando a simulacao \n");
-			break;
-		} 
-		case 3: { 
-			printf("\nPausando a simulacao \n");
-			break;
-		} 
-		case 4: { 
-			printf("\nImprimindo o resultados \n");
-			lerficheiro();
-			break;
-
-		} 
-		case 5: { 
-			printf("\nTerminando a simulacao \n");
-			break;
-		}
-	} 
-}
 
 int main(int argc , char *argv[]){ 
 	client_socket();

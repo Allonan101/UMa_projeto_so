@@ -8,10 +8,104 @@
 #include <arpa/inet.h>
 #include <unistd.h>	
 
+#define NAME_SIZE 100
+#define BUFFER_SIZE 256 
+#define NUMBER_OF_CONFIGS 15
 
-void load_conf_simulador(){ //Load do ficheiro de configuracao_simul.conf para listas
-	
+/*					REVER
+//semaforo que trata da fila prioritária e normal
+//semaforo que trata do isolamento de utente prioritário e normal
+sem_t fila_prio_normal;
+sem_t isolamento_prio_normal;
+*/
+
+//trinco para ponto testagem
+//trinco para isolamento
+pthread_mutex_t mutex_posto_testagem;
+pthread_mutex_t mutex_isolamento;
+
+int utenteNormais = 0; 
+int utentePriori = 0; 
+int utentePrioriIsolamento = 0;
+int utenteNormalIsolamento = 0;
+int utenteInternamento = 0;
+int utentePontoTestagem = 0;
+int utenteCentroTestagem = 0;
+//int numPontosTestagem = 0;
+//int numCentroTestagem = 0;
+
+struct configuracao
+{
+	int TEMPO_MEDIO_CHEGADA_UTENTES;
+	int NUMERO_PONTOS_TESTAGEM;
+	int NUMERO_CENTROS_TESTAGEM;
+	int NUMERO_MAX_TESTES_PESSOA;
+	int MAX_PESSOAS_FILA;
+	int MAX_PESSOS_FILA_PRIORITARIA;
+	int PROB_UTENTE_TER_COVID;
+	int PROB_UTENTE_SER_PRIO;
+	int ATUALIZACAO_RESULTADO;
+	int NUMERO_MAX_DOENTES_INTERNAMENTO;
+	int NUMERO_MAX_ISOLAMENTO;
+	int TEMPO_ATENDIMENTO;
+	int TEMPO_ISOLAMENTO;
+	int TEMPO_TESTE_RAPIDO;
+	int TEMPO_TESTE_CONVENCIONAL;
+};
+
+/*					REVER
+int *load_conf_simulador(char file){ //Load do icheiro de configuracao_simul.conf para listas
+    int conf = (int*)malloc(sizeof(int) * NUMBER_OF_CONFIGS);
+    FILE* fp = fopen(file, "rb");
+
+    if (fp == NULL)
+    {
+        printf("Não é possível abrir o ficheiro de configuração.\n");
+        abort();
+    }
+
+    int num, i = 0;
+    char name[NAME_SIZE], buff[BUFFER_SIZE];
+
+    while (fgets(buff, sizeof buff, fp) != NULL)
+    {
+        if (sscanf(buff, "%[^=]=%d", name, &num) == 2)
+            conf[i++] = num;
+    }
+
+    fclose(fp);
+    return conf;
 }
+*/
+
+/*					REVER
+//Função para tratar o tipo de utente, utente prioritário=1,utente normal=2
+void *tarefa_utente()
+{
+	utenteCentroTestagem++;
+	int tipoUtente;
+	int idUtente; 
+	int PontoTestagemX = 0;
+	int utenteRandom = rand()%100 + 1; //neste caso será um número ao calhas entre 1 e 100
+	if(utenteRandom <= configs.prob_ute_ser_prio)//já está definido no configs
+		tipoUtente = 2;  //cliente normal
+	else
+		tipoUtente = 1;  //o cliente prioritário
+	
+    //int tempoEsperaFila; tempo de espera na fila
+	//char buffer[BUFFER_SIZE];
+	pthread_mutex_lock(&mutex_posto_testagem); //############################################### FECHADO ###############################################
+	idUtente = IdUtenteCount++;
+	if(tipoUtentee == 2) /// clit prioritario
+		utentePriori++;
+	else //if(tipoUtente == 1)--clit normal
+		utenteNormais++;
+	pthread_mutex_unlock(&mutex_posto_testagem); //############################################# ABERTO #############################################
+
+
+}
+*/
+
 
 void cria_evento(){
 
