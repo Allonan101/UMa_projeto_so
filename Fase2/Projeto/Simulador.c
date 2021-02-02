@@ -15,8 +15,10 @@
 /*					REVER
 //semaforo que trata da fila prioritária e normal
 //semaforo que trata do isolamento de utente prioritário e normal
-sem_t fila_prio_normal;
-sem_t isolamento_prio_normal;
+sem_t fila_prio;
+sem_t fila_normal;
+sem_t isolamento_prio;
+sem_t isolamento_normal;
 */
 
 //trinco para ponto testagem
@@ -31,6 +33,7 @@ int utenteNormalIsolamento = 0;
 int utenteInternamento = 0;
 int utentePontoTestagem = 0;
 int utenteCentroTestagem = 0;
+int utenteIsolamento = 0;
 //int numPontosTestagem = 0;
 //int numCentroTestagem = 0;
 
@@ -96,11 +99,122 @@ void *tarefa_utente()
 	//char buffer[BUFFER_SIZE];
 	pthread_mutex_lock(&mutex_posto_testagem); //############################################### FECHADO ###############################################
 	idUtente = IdUtenteCount++;
-	if(tipoUtentee == 2) /// clit prioritario
+	if(tipoUtente == 2) /// utente prioritario
 		utentePriori++;
-	else //if(tipoUtente == 1)--clit normal
+	else //if(tipoUtente == 1)-- utente normal
 		utenteNormais++;
 	pthread_mutex_unlock(&mutex_posto_testagem); //############################################# ABERTO #############################################
+	
+	
+	///falta evento 2 cliente entra num centro de testagem<<<<<<<<
+	
+	
+	tempoChegadaUtente = (int)time(0); //tempo que utente chega desde o "tempo zero"
+	//neste caso escreve e envia o evento dois que é o cliente entra no posto de testagem
+	sprintf(buffer, "%d  %d %d\n", (int)time(0), idUtente tipoUtente); //supostamente vai ser evento 3
+	send(sockfd, buffer, sizeof(buffer), 0); //envia
+	
+	if(tipoUtente == 1) //utente normal
+		sem_wait(&fila_prio_normal); //############################################### ESPERA ###############################################
+	
+	sem_wait(&fila_prio_normal); //############################################### ESPERA ###############################################
+	
+	//não é necessário proteger com um trinco porque está na tarefa posto de testagem, a postodetestagemDispo (postodetestagemDispo) só vai mudar depois do cliente
+	mudar os dados do atendimento deste posto de testagem
+	int pontodetestagemID = pontodetestagemDispo;
+	
+	//utente é retirado das filas
+	//pthread_mutex_lock(&mutex_utente); //############################################### FECHADO ###############################################
+	if(tipoutente == 2) //cliente é prioritario retirado da fila
+		utentePriori--;
+	else
+		utenteNormais--; //cliente normal retirado da fila
+	pthread_mutex_unlock(&mutex_cli); //############################################# ABERTO #############################################
+	
+	//cliente foi atendido
+	tempoEsperaFila = (int)time(0) - tempoChegadaUtente;
+	
+	//utente é atendido no posto de testagem
+	pontodetestagem[pontodetestagemID].tempDemoraTeste = tempoChegadaUtente + tempoEsperaFila; //tempo que demora a ser testado ou seja tempo que esperou na fila + tempo que demorou a chegar
+	pontodetestagem[pontodetestagemID].IDutente = idUtente; //Associar um posto de testagem a um cliente
+	if(tipoUtente == 1) 
+	{/// utente normal
+		UtenteNormais--;
+		utentePontoTestagem--;
+		utenteIsolamento++;
+	}
+	else
+	{ //if(tipoCliente == 2 ou outros que neste caso não irá acontecer) cliente prioritario
+		UtenteNormais--;
+		utentePontoTestagem--;
+		utenteIsolamento++;
+	}
+
+	//neste caso escreve e envia o evento 4, Utente é testado, sai do ponto de testagem e dirige-se ao isolamento
+	
+	aqui supostamente é preciso um trinco e nao um semaforo como esta no relatorio
+	sprintf(buffer, "%d 4 %d %d\n", (int)time(0), idUtente, tipoUtente);
+	send(sockfd, buffer, sizeof(buffer), 0);
+	sem_wait(&pontodetestagem[pontodetestagemID].espera_ser_atendido); //############################################### POST ###############################################
+
+	tempoChegadaUtenteIsolamento = (int)time(0); //tempo chegada utente ao isolamento
+
+	if(tipoUtente == 1) //CLIENTE NORMAL
+//aqui é trinco e nao semaforo
+		sem_wait(&fila_normal_isolamento); //############################################### ESPERA ###############################################
+	
+	sem_wait(&fila_prio_isolamento); //############################################### ESPERA ###############################################
+	int isolamentoID = isolamentoDispo; ///associar id ao isolamento
+	if(tipoUtente == 2) 
+		isolamento[isolamentoID].filaPrioisolamento++;
+	else
+		isolamento[isolamentoID].filaNormalIsolamento++;
+	//utente é retirado da fila
+	
+	
+	
+	
+	
+	
+	//utente é retirado da fila
+	pthread_mutex_lock(&isolamento[isolamentoID].mutex_isolamento); //############################################### FECHADO ###############################################
+	if(tipoUtente == 2) //utente é prioritario retirado do isolamento
+		isolamento[isolamentoID].isolamento_prio--;
+	else
+		isolamento[isolamentoID].isolamento_normal--; //cliente normal retirado da fila
+	pthread_mutex_unlock(&isolamento[isolamentoID].mutex_isolamento); //############################################# ABERTO #############################################
+	
+	//utente foi testado e econtra-se em isolamento
+	a espera resultado do teste
+	int tempoEsperaIsolamento = (int)time(0) - tempoChegadaUtenteIsolamento;
+	isolamento[isolamentoID].tempoPassagem = tempoEsperaIsolamento + tempoChegadaUtenteIsolamento;
+	isolamento[isolamentoID].internamento=isolamentoID;
+	if(resultadoTeste==true)//Resultado positivo
+	{
+		internamento.[internamentoID].internamentoUtente
+	}
+	else
+	{
+		utenteCentroTestagem--;
+	}
+	isolamento[isolamentoID].IDUtente = idUtente; //Associar utente a isolamento
+	//evento 4 ou seja cliente esta em isolamento
+	sprintf(buffer, "%d 4 %d %d %d %d\n", (int)time(0), idUtente, tipoUtente, isolamento[isolamentoID].isolamentoID;
+	//utente X prior/normal  esta no isolamento Y, no tempo X
+	send(sockfd, buffer, sizeof(buffer), 0);
+	utenteIsolamento-;
+	utenteInternamento++;
+
+
+
+}
+	
+
+FALTA EVENTOS!!!!!
+	}
+
+}
+
 
 
 }
