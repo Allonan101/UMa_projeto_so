@@ -7,22 +7,22 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <unistd.h>	
+#include <pthread.h> 
+#include <semaphore.h> 
+#include <unistd.h> 
 
 #define NAME_SIZE 100
 #define BUFFER_SIZE 256 
 #define NUMBER_OF_CONFIGS 15
 
-/*					REVER
-//semaforo que trata da fila prioritária e normal
-//semaforo que trata do isolamento de utente prioritário e normal
-sem_t fila_prio_normal;
-sem_t isolamento_prio_normal;
-*/
+//TRINCOS
+pthread_mutex_t mutex_posto_testagem; //trinco para ponto testagem
+pthread_mutex_t mutex_isolamento; //trinco para isolamento
 
-//trinco para ponto testagem
-//trinco para isolamento
-pthread_mutex_t mutex_posto_testagem;
-pthread_mutex_t mutex_isolamento;
+//SEMAFOROS
+sem_t fila_priori;
+sem_t fila_normal;
+
 
 int utenteNormais = 0; 
 int utentePriori = 0; 
@@ -31,10 +31,9 @@ int utenteNormalIsolamento = 0;
 int utenteInternamento = 0;
 int utentePontoTestagem = 0;
 int utenteCentroTestagem = 0;
-//int numPontosTestagem = 0;
-//int numCentroTestagem = 0;
 
-struct configuracao
+
+typedef struct 
 {
 	int TEMPO_MEDIO_CHEGADA_UTENTES;
 	int NUMERO_PONTOS_TESTAGEM;
@@ -51,32 +50,34 @@ struct configuracao
 	int TEMPO_ISOLAMENTO;
 	int TEMPO_TESTE_RAPIDO;
 	int TEMPO_TESTE_CONVENCIONAL;
-};
+}configuracao;
 
-/*					REVER
-int *load_conf_simulador(char file){ //Load do icheiro de configuracao_simul.conf para listas
-    int conf = (int*)malloc(sizeof(int) * NUMBER_OF_CONFIGS);
-    FILE* fp = fopen(file, "rb");
+configuracao config;
 
-    if (fp == NULL)
-    {
-        printf("Não é possível abrir o ficheiro de configuração.\n");
-        abort();
-    }
+int* load_conf_simulador(char *file)
+{
+	int* conf = (int*)malloc(sizeof(int) * NUMBER_OF_CONFIGS);
+	FILE *fp = fopen(file, "rb");
 
-    int num, i = 0;
-    char name[NAME_SIZE], buff[BUFFER_SIZE];
+	if (fp == NULL)
+	{
+		printf("Não e possível abrir o ficheiro de configuração.\n");
+		abort();
+	}
 
-    while (fgets(buff, sizeof buff, fp) != NULL)
-    {
-        if (sscanf(buff, "%[^=]=%d", name, &num) == 2)
-            conf[i++] = num;
-    }
+	int num, i = 0;
+	char name[NAME_SIZE], buff[BUFFER_SIZE];
 
-    fclose(fp);
-    return conf;
+	while (fgets(buff, sizeof buff, fp) != NULL)
+	{
+		if (sscanf(buff, "%[^=]=%d", name, &num) == 2)
+			conf[i++] = num;
+	}
+
+	fclose(fp);
+	return conf;
 }
-*/
+
 
 /*					REVER
 //Função para tratar o tipo de utente, utente prioritário=1,utente normal=2
@@ -109,6 +110,23 @@ void *tarefa_utente()
 
 void cria_evento(){
 
+
+}
+
+void *gerar_utentes(void *arg){
+	
+	//tem espaço na fila para criar uma pessoa
+	if(utenteNormais<config.MAX_PESSOAS_FILA){ 
+		//usar trincos
+	}
+
+	//tem espaço na fila para criar uma pessoa prioritária
+	if(utentePriori<config.MAX_PESSOS_FILA_PRIORITARIA){ 
+		//usar trincos
+
+	}
+	
+	//printf("%d", config.MAX_PESSOAS_FILA);
 
 }
 
@@ -161,11 +179,16 @@ void criasocket(){
 	while( (read_size = recv(client_sock , client_message , 2000 , 0)) > 0 )
 	{	
 
-		int evento = atoi(client_message);
+		int opcao = atoi(client_message);
 
-		switch(evento){
-			case 1: {
-				//Iniciar simulação
+		
+
+		switch(opcao){
+			case 1: { //Iniciar simulação
+
+				pthread_t thread;
+				pthread_create(&thread, NULL, &gerar_utentes, NULL);
+
 				//Função para gerar aleatoriamente um ou mais utentes com threads incluindo os atributos gerados pelo ficheiro de configuração
 				//Função para gerar eventos
 			}
@@ -204,8 +227,32 @@ void criasocket(){
 	return 0;
 
 }
-int main(int argc , char *argv[]) { 
+int main(int argc, char **argv) {
 
+	//LOAD CONFIGURAÇÃO
+	int *conf = load_conf_simulador(argv[1]);
+	config.TEMPO_MEDIO_CHEGADA_UTENTES = conf[0];
+	config.NUMERO_PONTOS_TESTAGEM = conf[1];
+	config.NUMERO_CENTROS_TESTAGEM = conf[2];
+	config.NUMERO_MAX_TESTES_PESSOA = conf[3];
+	config.MAX_PESSOAS_FILA = conf[4];
+	config.MAX_PESSOS_FILA_PRIORITARIA = conf[5];
+	config.PROB_UTENTE_TER_COVID = conf[6];
+	config.PROB_UTENTE_SER_PRIO = conf[7];
+	config.ATUALIZACAO_RESULTADO = conf[8];
+	config.NUMERO_MAX_DOENTES_INTERNAMENTO = conf[9];
+	config.NUMERO_MAX_ISOLAMENTO = conf[10];
+	config.TEMPO_ATENDIMENTO = conf[11];
+	config.TEMPO_ISOLAMENTO = conf[12];
+	config.TEMPO_TESTE_RAPIDO = conf[13];
+	config.TEMPO_TESTE_CONVENCIONAL = conf[14];
+	int loop;
+	for (loop = 0; loop < NUMBER_OF_CONFIGS; loop++){
+		printf("%d ", conf[loop]);
+	}
+	
 	criasocket();
+
+	
 
 }

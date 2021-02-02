@@ -15,7 +15,7 @@
 const char file_name[] = "Relatorio.txt";
 
 void load_conf_monitor(){
-
+	
 }
 
 void lerficheiro(){ 
