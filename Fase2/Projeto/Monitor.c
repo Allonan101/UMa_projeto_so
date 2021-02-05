@@ -14,6 +14,8 @@
 //Variaveis globais
 const char file_name[] = "Relatorio.txt";
 int estado_centro = 0; //Fechado = 0/Aberto = 1
+int iniciado = 0; 
+
 void load_conf_monitor(){
 	
 }
@@ -31,7 +33,7 @@ void lerficheiro(){
 		printf("\n");
 	}
 	else{
-		printf("Erro no acesso ao ficheiro\n");
+		printf("Erro no acesso ao ficheiro \n");
 		exit(0);
 	}
 }
@@ -41,7 +43,7 @@ void escreve_relatorio(char* input){ //Escrever para o ficheiro
 	FILE *ficheiro = fopen("Relatorio.txt", "a");
 
 	if (ficheiro == NULL){
-		printf("Erro ao abrir ficheiro\n");
+		printf("Erro ao abrir ficheiro \n");
 		exit(-1);
 	}
 
@@ -51,29 +53,30 @@ void escreve_relatorio(char* input){ //Escrever para o ficheiro
 }
 
 void menu(x){
-	printf("%d",x);
+
 	switch (x) { 
 		case 1: { 
-			printf("\nIniciando a simulacao \n");
+			printf("Iniciando a simulacao \n");
 			break;
 		} 
 
 		case 2: { 
-			printf("\nContinuando a simulacao \n");
+			printf("Continuando a simulacao \n");
 			break;
 		} 
 		case 3: { 
-			printf("\nPausando a simulacao \n");
+			printf("Pausando a simulacao \n");
 			break;
 		} 
 		case 4: { 
-			printf("\nImprimindo o resultados \n");
+			printf("Imprimindo o resultados \n");
 			lerficheiro();
 			break;
 
 		} 
 		case 5: { 
-			printf("\nTerminando a simulacao \n");
+			printf("####Centro de testagem fecha####\n");
+			estado_centro = 0;
 			break;
 		}
 	} 
@@ -90,7 +93,7 @@ void client_socket(){
 	{
 		printf("Nao foi possivel criar o socket");
 	}
-	puts("Socket criado");
+	puts("Socket criado \n");
 	
 	server.sin_addr.s_addr = inet_addr("127.0.0.1");
 	server.sin_family = AF_INET;
@@ -104,7 +107,7 @@ void client_socket(){
 	}
 	
 	puts("Conectado\n");
-	puts("Apagando o relatorio anterior...");
+	puts("Apagando o relatorio anterior...\n");
 	remove("Relatorio.txt");
 
 	char mensagem_de_envio[20] = "Enviado:";
@@ -118,7 +121,7 @@ void client_socket(){
 		"2 - Continuar a simulacao \n"
 		"3 - Pausar a simulacao \n"
 		"4 - Imprimir os resultados \n"
-		"5 - Terminar a simulacao \n");
+		"5 - Terminar a simulacao \n\n");
 
 		scanf("%s" , message);
 
@@ -126,6 +129,15 @@ void client_socket(){
 		escreve_relatorio(message);
 
 		int evento_envio = atoi(message); //Evento a enviar
+
+		if(evento_envio == 1 && iniciado == 1){
+			evento_envio = 2;
+			printf("Simulacao já iniciada!\n");
+		}
+		if(evento_envio == 1 && iniciado == 0){
+			iniciado = 1;
+		}
+
 		menu(evento_envio);
 
 		//Envio de dados
@@ -136,7 +148,7 @@ void client_socket(){
 		}
 		
 		if(evento_envio == 5){
-			printf("Terminando com o codigo: %d",evento_envio);
+			printf("Terminando com o codigo: %d \n",evento_envio);
 			exit(0);
 			break;
 		}
@@ -151,14 +163,9 @@ void client_socket(){
 		//Eventos recebidos
 		int evento_recebido = atoi(resposta_server);
 
-		if(evento_recebido==1){
-			if (estado_centro == 0){
-				printf("Centro de testagem abre");
-				estado_centro = 1;
-			}else{
-				printf("Centro de testagem fecha");
-				estado_centro = 0;
-			}
+		if(evento_recebido==1 && estado_centro ==0){
+			printf("\n#####Centro de testagem abre#####\n");
+		 	estado_centro = 1;	
 		}
 		if(evento_recebido==2){
 		
@@ -188,8 +195,8 @@ void client_socket(){
 		escreve_relatorio(mensagem_do_simulador);
 		escreve_relatorio(resposta_server);
 
-		puts("Resposta do simulador :");
-		puts(resposta_server);
+		printf("Evento recebido do simulador: %d",evento_recebido);
+		printf("\n********************************\n");
 	}
 	
 	close(sock);

@@ -28,6 +28,7 @@ sem_t fila_normal;
 sem_t isolamento_prio;
 sem_t isolamento_normal;
 
+//Variaveis globais
 int id_utentes = 0;
 int utenteNormais = 0; 
 int utentePriori = 0; 
@@ -40,7 +41,7 @@ int utenteNormalFila = 0;
 int utentePrioriFila = 0;
 int utenteIsolamFila = 0;
 int tempo_universal = 0;
-
+int iniciado = 0;
 
 typedef struct {
 	int TEMPO_MEDIO_CHEGADA_UTENTES;
@@ -96,23 +97,24 @@ void adiciona_utente(int id, int prioridade, int posto_testagem, int sala_isolam
 }
 
 void imprime_utentes() {
-	printf("Utentes: \n");
+	printf("----Utentes----\n");
 	int j;
 	for (j = 0; j < NUM_MAX_PESSOAS; ++j) {
 		if(utentes[j].id == NULL){
 			break;
 		}
-		printf("%d", utentes[j].id);
-		printf("%d", utentes[j].prioridade);
-		printf("%d", utentes[j].posto_testagem);
-		printf("%d", utentes[j].sala_isolamento);
-		printf("%d", utentes[j].internamento);
-		printf("%d", utentes[j].saiu);
-		printf("%d", utentes[j].tipo_teste);
-		printf("%d", utentes[j].tempo);
-		printf("%d", utentes[j].tempo_global);
+		printf("ID: %d ", utentes[j].id);
+		printf("Prioridade: %d ", utentes[j].prioridade);
+		printf("Posto: %d ", utentes[j].posto_testagem);
+		printf("Sala: %d ", utentes[j].sala_isolamento);
+		printf("Internamento: %d ", utentes[j].internamento);
+		printf("Saiu: %d ", utentes[j].saiu);
+		printf("Teste: %d ", utentes[j].tipo_teste);
+		printf("Tempo: %d ", utentes[j].tempo);
+		printf("Tempo Global: %d s", utentes[j].tempo_global);
 		printf("\n");
 	}
+	printf("--------");
 }
 
 int random_num(int min, int max){
@@ -302,6 +304,7 @@ void *gerar_utentes(void *arg){
 	int tempo_global = tempo_universal;
 
 	adiciona_utente(id_utentes, prioridade, NULL, NULL, NULL, saiu, tipo_teste, tempo, tempo_global);
+	imprime_utentes();
 }
 
 
@@ -330,7 +333,7 @@ void criasocket(){
 		perror("Bind falhou");
 		return 1;
 	}
-	puts("Bind completo");
+	puts("Bind completo \n");
 
 	//Listen
 	listen(socket_desc , 3);
@@ -347,16 +350,16 @@ void criasocket(){
 	}
 	puts("Conexão aceite");
 
-	int iniciado = 0;
-
 	//Receber mensagem do cliente
 	while( (read_size = recv(client_sock , client_message , 2000 , 0)) > 0 )
 	{	
 
 		int opcao = atoi(client_message);
 
+
 		if(opcao == 1 && iniciado == 1){
 			opcao = 2;
+			sprintf(client_message, "%d", opcao); //int para str
 		}
 		if(opcao == 1 && iniciado == 0){
 			iniciado = 1;
@@ -369,7 +372,6 @@ void criasocket(){
 				//Função para gerar aleatoriamente um ou mais utentes com threads 
 				pthread_t thread;
 				pthread_create(&thread, NULL, &gerar_utentes, NULL);
-				imprime_utentes();
 				
 				//Enviar o evento da abertura do centro
 				write(client_sock , client_message , strlen(client_message)+1);
@@ -377,6 +379,7 @@ void criasocket(){
 			}
 
 			case 2: { //Continuar a simulacao 
+				
 				tempo_universal++;
 
 				//Função para entrar no centro
@@ -388,15 +391,11 @@ void criasocket(){
 				break; 
 			}
 			case 5: {
-				printf("Terminando com o codigo: %d",opcao);
+				printf("Terminando com o codigo: %d \n",opcao);
 				exit(0);
 				break;
 			}
 		}
-
-
-		//Enviar mensagem de volta ao cliente
-		write(client_sock , client_message , strlen(client_message)+1);
 
 		//----------------Comunicação-------------------
 		
