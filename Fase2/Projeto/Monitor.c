@@ -13,7 +13,7 @@
 
 //Variaveis globais
 const char file_name[] = "Relatorio.txt";
-
+int estado_centro = 0; //Fechado = 0/Aberto = 1
 void load_conf_monitor(){
 	
 }
@@ -82,7 +82,7 @@ void menu(x){
 void client_socket(){
 	int sock;
 	struct sockaddr_in server;
-	char message[1000] , server_reply[2000];
+	char message[1000] , resposta_server[2000];
 	
 	//Criar um socket
 	sock = socket(AF_INET , SOCK_STREAM , 0);
@@ -125,8 +125,8 @@ void client_socket(){
 		escreve_relatorio(mensagem_de_envio);
 		escreve_relatorio(message);
 
-		int x = atoi(message);
-		menu(x);
+		int evento_envio = atoi(message); //Evento a enviar
+		menu(evento_envio);
 
 		//Envio de dados
 		if( send(sock , message , strlen(message)+1 , 0) < 0)
@@ -135,18 +135,61 @@ void client_socket(){
 			return 1;
 		}
 		
+		if(evento_envio == 5){
+			printf("Terminando com o codigo: %d",evento_envio);
+			exit(0);
+			break;
+		}
+
 		//Resposta do simulador
-		if( recv(sock , server_reply , 2000 , 0) < 0)
+		if( recv(sock , resposta_server , 2000 , 0) < 0)
 		{
 			puts("recv falhou");
 			break;
 		}
 		
+		//Eventos recebidos
+		int evento_recebido = atoi(resposta_server);
+
+		if(evento_recebido==1){
+			if (estado_centro == 0){
+				printf("Centro de testagem abre");
+				estado_centro = 1;
+			}else{
+				printf("Centro de testagem fecha");
+				estado_centro = 0;
+			}
+		}
+		if(evento_recebido==2){
+		
+		}
+		if(evento_recebido==3){
+		
+		}
+		if(evento_recebido==4){
+		
+		}
+		if(evento_recebido==5){
+		
+		}
+		if(evento_recebido==6){
+		
+		}
+		if(evento_recebido==7){
+		
+		}
+		if(evento_recebido==8){
+		
+		}
+		if(evento_recebido==9){
+		
+		}
+
 		escreve_relatorio(mensagem_do_simulador);
-		escreve_relatorio(server_reply);
+		escreve_relatorio(resposta_server);
 
 		puts("Resposta do simulador :");
-		puts(server_reply);
+		puts(resposta_server);
 	}
 	
 	close(sock);
