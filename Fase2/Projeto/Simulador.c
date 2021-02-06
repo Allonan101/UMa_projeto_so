@@ -17,6 +17,8 @@
 #define NUMBER_OF_CONFIGS 15
 #define NUM_MAX_PESSOAS 20
 
+int postos[];
+
 //TRINCOS
 pthread_mutex_t mutex_utente;
 pthread_mutex_t mutex_posto_testagem; //trinco para ponto testagem
@@ -25,21 +27,17 @@ pthread_mutex_t mutex_isolamento; //trinco para isolamento
 //SEMAFOROS
 sem_t fila_prio;	
 sem_t fila_normal;
-sem_t isolamento_prio;
-sem_t isolamento_normal;
+sem_t fila_isolamento_prio;
+sem_t fila_isolamento_normal;
 
 //Variaveis globais
-int id_utentes = 0;
-int utenteNormais = 0; 
-int utentePriori = 0; 
-int utentePrioriIsolamento = 0;
-int utenteNormalIsolamento = 0;
-int utenteInternamento = 0;
-int utentePontoTestagem = 0;
-int utenteCentroTestagem = 0;
-int utenteNormalFila = 0;
-int utentePrioriFila = 0;
-int utenteIsolamFila = 0;
+int id_utentes = 0; //é o counter e o id do utente
+int numUtentesIsolamento = 0;
+int numUtentesInternamento = 0;
+int numUtentesPontoTestagem = 0;
+int numUtentesCentroTestagem = 0;
+int numUtentesFilaNormal = 0;
+int numUtentesFilaPriori = 0;
 int tempo_universal = 0;
 int iniciado = 0;
 
@@ -73,12 +71,12 @@ struct utente {
 	int saiu;
 	int tipo_teste;
 	int tempo;
-	int tempo_global;
+	int covid;
 };
 
 struct utente utentes[NUM_MAX_PESSOAS];
 
-void adiciona_utente(int id, int prioridade, int posto_testagem, int sala_isolamento, int internamento, int saiu, int tipo_teste, int tempo, int tempo_global) {
+void adiciona_utente(int id, int prioridade, int posto_testagem, int sala_isolamento, int internamento, int saiu, int tipo_teste, int tempo, int covid) {
 	int i = 0;
 	while (utentes[i].id != NULL && i<NUM_MAX_PESSOAS) {
 		i++;
@@ -92,7 +90,7 @@ void adiciona_utente(int id, int prioridade, int posto_testagem, int sala_isolam
 		utentes[i].saiu = saiu;
 		utentes[i].tipo_teste = tipo_teste;
 		utentes[i].tempo = tempo;
-		utentes[i].tempo_global = tempo_global;
+		utentes[i].covid = covid;
 	}
 }
 
@@ -104,6 +102,7 @@ void imprime_utentes() {
 			break;
 		}
 		printf("ID: %d ", utentes[j].id);
+		
 		printf("Prioridade: %d ", utentes[j].prioridade);
 		printf("Posto: %d ", utentes[j].posto_testagem);
 		printf("Sala: %d ", utentes[j].sala_isolamento);
@@ -111,10 +110,10 @@ void imprime_utentes() {
 		printf("Saiu: %d ", utentes[j].saiu);
 		printf("Teste: %d ", utentes[j].tipo_teste);
 		printf("Tempo: %d ", utentes[j].tempo);
-		printf("Tempo Global: %d s", utentes[j].tempo_global);
+		printf("Covid: %d ", utentes[j].covid);
 		printf("\n");
 	}
-	printf("--------");
+	printf("--------\n\n");
 }
 
 int random_num(int min, int max){
@@ -146,112 +145,24 @@ int* load_conf_simulador(char *file)
 	return conf;
 }
 
-void *utente(void *arg){
-	/*
-	config.TEMPO_MEDIO_CHEGADA_UTENTES;
-	config.NUMERO_POSTOS_TESTAGEM;
-	config.NUMERO_CENTROS_TESTAGEM;
-	config.NUMERO_MAX_TESTES_PESSOA;
-	config.MAX_PESSOAS_FILA;
-	config.MAX_PESSOS_FILA_PRIORITARIA;
-	config.PROB_UTENTE_TER_COVID;
-	config.PROB_UTENTE_SER_PRIO;
-	config.ATUALIZACAO_RESULTADO;
-	config.NUMERO_MAX_DOENTES_INTERNAMENTO;
-	config.NUMERO_MAX_ISOLAMENTO;
-	config.TEMPO_ATENDIMENTO;
-	config.TEMPO_ISOLAMENTO;
-	config.TEMPO_TESTE_RAPIDO;
-	config.TEMPO_TESTE_CONVENCIONAL;
-	*/
-	
-	while(1){
-		printf("Verificando utente : \n");
-
-		int j;
-		
-			
-		if(utentes[j].saiu != 1){ //Se essa pessoa nao saiu 
-			
-			if(utentes[j].prioridade == 1){ //Se essa pessoa tem prioridade
-
-				if(utentes[j].posto_testagem == 1){ //Se está no ponto de testagem
-					
-					if(utentes[j].sala_isolamento == 1){ //Se está no isolamento
-						
-						if(utentes[j].internamento == 1){ //Se está no internamento
-						
-						}
-						else{ //Se está não está no internamento
-
-						}
-					}
-					else{ //Não está no isolamento
-
-					}
-				}
-				else{ //Não está no ponto de testagem
-
-				}
-			}
-			
-			else{ //Não tem prioridade
-
-				if(utentes[j].posto_testagem == 1){ //Se está no ponto de testagem
-					
-					if(utentes[j].sala_isolamento == 1){ //Se está no isolamento
-						
-						if(utentes[j].internamento == 1){ //Se está no internamento
-						
-						}
-						else{ //Se está não está no internamento
-
-						}
-					}
-					else{ //Não está no isolamento
-
-					}
-				}
-				else{ //Não está no ponto de testagem
-
-				}
-			}
-		}
-		else{
-			printf("Utente x saiu.");
-			//pthread_cancel(pthread_t thread);
-		}
-			
-			
-		printf("%d", utentes[j].id);
-		printf("%d", utentes[j].prioridade);
-		printf("%d", utentes[j].posto_testagem);
-		printf("%d", utentes[j].sala_isolamento);
-		printf("%d", utentes[j].internamento);
-		printf("%d", utentes[j].saiu);
-		printf("%d", utentes[j].tipo_teste);
-		printf("%d", utentes[j].tempo);
-		printf("%d", utentes[j].tempo_global);
-		printf("\n");
-		
-	}
-}
-
-
+//XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 void *gerar_utentes(void *arg){
 
 	int probabilidade;
+	char buffer[BUFFER_SIZE];
+
 
 	pthread_mutex_lock(&mutex_utente);
+	int id_pessoal = id_utentes;
 	id_utentes++; //adiciona na variavel global de utentes
 	pthread_mutex_unlock(&mutex_utente);
 
 	//DEFINIR PRIORIDADE
 	int prioridade = 0;
 	//printf("Prob de ser priori: %d \n",config.PROB_UTENTE_SER_PRIO);
-	probabilidade = random_num(1,config.PROB_UTENTE_SER_PRIO); 
+	probabilidade = random_num(0,100); 
 	//printf("Prob que calhou: %d \n",probabilidade);
-	if(probabilidade == config.PROB_UTENTE_SER_PRIO){
+	if(probabilidade <= config.PROB_UTENTE_SER_PRIO){
 		prioridade = 1;
 	}
 
@@ -273,12 +184,11 @@ void *gerar_utentes(void *arg){
 	if(prioridade == 0){
 
 		//verificar se tem espaço na fila
-		if(utenteNormalFila<config.MAX_PESSOAS_FILA){ 
-			utenteNormalFila++;
-			utenteNormais++;
+		if(numUtentesFilaNormal<config.MAX_PESSOAS_FILA){ 
+			numUtentesFilaNormal++;
 		}
 		else{
-			printf("Utente saiu por fila normal cheia \n");
+			printf("Utente %d saiu por fila normal cheia \n", id_pessoal);
 			saiu = 1;
 		}
 	}
@@ -286,12 +196,11 @@ void *gerar_utentes(void *arg){
 	else{
 
 		//tem espaço na fila para criar uma pessoa prioritária
-		if(utentePrioriFila<config.MAX_PESSOS_FILA_PRIORITARIA){ 
-			utentePrioriFila++;
-			utentePriori++;
+		if(numUtentesFilaPriori<config.MAX_PESSOS_FILA_PRIORITARIA){ 
+			numUtentesFilaPriori++;
 		}
 		else{
-			printf("Utente saiu por fila prioritaria cheia \n");
+			printf("Utente %d saiu por fila prioritaria cheia \n",id_pessoal);
 			saiu = 1;
 		}
 
@@ -300,11 +209,253 @@ void *gerar_utentes(void *arg){
 	pthread_mutex_unlock(&mutex_utente);
 
 	//TEMPOS
-	int tempo = 0;
-	int tempo_global = tempo_universal;
+	int tempo = tempo_universal;
+	int tempo_no_centro = 0;
+	int tempo_no_posto_de_testagem = 0; //tempo que demora no teste
 
-	adiciona_utente(id_utentes, prioridade, NULL, NULL, NULL, saiu, tipo_teste, tempo, tempo_global);
-	imprime_utentes();
+	
+	//COVID
+	int covid = 0;
+
+	//POSTO QUE FICOU
+	int posto_pessoal = 0;
+
+	adiciona_utente(id_pessoal, prioridade, NULL, NULL, NULL, saiu, tipo_teste, tempo, covid);
+	
+
+	//Simulação de entrar no centro
+	
+	while(1){
+
+		while(tempo_universal == utentes[id_pessoal].tempo){ //ZAWARUDOO Enquanto o tempo universal nao muda, nao faz nada.
+			
+		}
+
+		//Time has begun to move again 
+		
+		pthread_mutex_lock(&mutex_utente);
+		tempo_no_centro++;
+		pthread_mutex_unlock(&mutex_utente);
+		
+		utentes[id_pessoal].tempo = tempo_universal;
+
+		//printf("Tempo do utente %d é %d \n",id_pessoal,tempo);
+		//printf("Tempo universal é %d \n",tempo_universal);
+		//printf("Tempo do utente %d no centro é %d \n \n",id_pessoal,tempo_no_centro);
+	
+		if(utentes[id_pessoal].saiu != 1){ //Se essa pessoa nao saiu 
+
+			if(utentes[id_pessoal].prioridade == 1){ //Se essa pessoa tem prioridade
+
+				if(utentes[id_pessoal].posto_testagem == 2){ //Se essa pessoa já teve no posto de testagem 
+
+					printf("Utente %d já teve no posto de testagem e vai para o isolamento \n",id_pessoal);
+
+					if(utentes[id_pessoal].sala_isolamento == 1){ //Se está no isolamento
+						
+						if(utentes[id_pessoal].internamento == 1){ //Se está no internamento
+						
+						}
+						else{ //Se está não está no internamento
+
+						}
+					}
+					else{ //Não está no isolamento
+
+					}
+
+				}
+
+				if(utentes[id_pessoal].posto_testagem == 1){ //Está no ponto de testagem ------------------------------
+
+					printf("Utente %d está no ponto de testagem \n",id_pessoal);
+
+					//verificar teste do utilizador
+
+					if(utentes[id_pessoal].tipo_teste == 0){ //utente faz teste convencional
+
+						if(tempo_no_posto_de_testagem < config.TEMPO_TESTE_CONVENCIONAL){ //espera para fazer o teste convencional
+							pthread_mutex_lock(&mutex_utente);
+							tempo_no_posto_de_testagem++;
+							pthread_mutex_unlock(&mutex_utente);
+						}
+						else{
+							
+							printf("O utente %d recebeu o resultado do teste convecional \n",id_pessoal);
+							int random_covid;
+							random_covid = random_num(0,100); //probabilidade de ter covid positivo
+							if(random_covid <= config.PROB_UTENTE_TER_COVID){
+								utentes[id_pessoal].covid= 1;
+								printf("O utente %d tem covid positivo \n \n",id_pessoal);
+							}
+							else{
+								printf("O utente %d nao tem covid \n", id_pessoal);
+								postos[posto_pessoal] = 0; //posto fica livre
+								utentes[id_pessoal].saiu = 1; //sai do centro
+							}
+						}
+						
+			
+					}
+					else{	//utente faz teste_rápido
+
+						if(tempo_no_posto_de_testagem < config.TEMPO_TESTE_RAPIDO){ //espera para fazer o teste rápido
+							pthread_mutex_lock(&mutex_utente);
+							tempo_no_posto_de_testagem++;
+							pthread_mutex_unlock(&mutex_utente);
+						}
+						else{
+							printf("O utente %d recebeu o resultado do teste rápido \n",id_pessoal);
+							int random_covid;
+							random_covid = random_num(0,100); //probabilidade de ter covid positivo
+							if(random_covid <= config.PROB_UTENTE_TER_COVID){
+								utentes[id_pessoal].covid= 1;
+								printf("O utente %d tem covid positivo \n \n",id_pessoal);
+							}
+							else{
+								printf("O utente %d nao tem covid \n", id_pessoal);
+								postos[posto_pessoal] = 0; //posto fica livre
+								utentes[id_pessoal].saiu = 1; //sai do centro
+							}
+						}
+					}
+	
+				}
+
+				if(utentes[id_pessoal].posto_testagem == 0){ //Não está no ponto de testagem -------------------------
+
+					//verificar se já esperou o tempo nas configurações 
+					if(tempo_no_centro >= config.TEMPO_ATENDIMENTO){
+
+						//verificar se o posto está cheio, se nao estiver entra com o semaforo
+						sem_wait(&fila_prio); //===================================================================================
+						int x;
+						for(x = 0; x < config.NUMERO_POSTOS_TESTAGEM; x++){
+							if(postos[x] == 0){
+							postos[x] = 1;
+							posto_pessoal = x;
+							utentes[id_pessoal].posto_testagem = 1;
+							printf("Utente %d entrou no posto de testagem %d \n",id_pessoal,x);
+							numUtentesFilaPriori--;
+							break;
+							}
+						}
+						sem_post(&fila_prio); //===================================================================================
+					}
+
+				}
+				
+				
+			}
+			
+			else{ //Não tem prioridade
+
+				if(utentes[id_pessoal].posto_testagem == 2){ //Se essa pessoa já teve no posto de testagem 
+
+					printf("Utente %d já teve no posto de testagem e vai para o isolamento \n",id_pessoal);
+
+					if(utentes[id_pessoal].sala_isolamento == 1){ //Se está no isolamento
+						
+						if(utentes[id_pessoal].internamento == 1){ //Se está no internamento
+						
+						}
+						else{ //Se está não está no internamento
+
+						}
+					}
+					else{ //Não está no isolamento
+
+					}
+
+				}
+
+				if(utentes[id_pessoal].posto_testagem == 1){ //Está no ponto de testagem ------------------------------
+
+					printf("Utente %d está no ponto de testagem \n",id_pessoal);
+
+					//verificar teste do utilizador
+
+					if(utentes[id_pessoal].tipo_teste == 0){ //utente faz teste convencional
+						
+						if(tempo_no_posto_de_testagem < config.TEMPO_TESTE_CONVENCIONAL){ //espera para fazer o teste convencional
+							pthread_mutex_lock(&mutex_utente);
+							tempo_no_posto_de_testagem++;
+							pthread_mutex_unlock(&mutex_utente);
+						}
+						else{
+							
+							printf("O utente %d recebeu o resultado do teste convecional \n",id_pessoal);
+							int random_covid;
+							random_covid = random_num(0,100); //probabilidade de ter covid positivo
+							if(random_covid <= config.PROB_UTENTE_TER_COVID){
+								utentes[id_pessoal].covid= 1;
+								printf("O utente %d tem covid positivo \n \n",id_pessoal);
+							}
+							else{
+								printf("O utente %d nao tem covid \n", id_pessoal);
+								postos[posto_pessoal] = 0; //posto fica livre
+								utentes[id_pessoal].saiu = 1; //sai do centro
+							}
+						}
+						
+			
+					}
+					else{	//utente faz teste_rápido
+
+						if(tempo_no_posto_de_testagem < config.TEMPO_TESTE_RAPIDO){ //espera para fazer o teste rápido
+							pthread_mutex_lock(&mutex_utente);
+							tempo_no_posto_de_testagem++;
+							pthread_mutex_unlock(&mutex_utente);
+						}
+						else{
+							printf("O utente %d recebeu o resultado do teste rápido \n",id_pessoal);
+							int random_covid;
+							random_covid = random_num(0,100); //probabilidade de ter covid positivo
+							if(random_covid <= config.PROB_UTENTE_TER_COVID){
+								utentes[id_pessoal].covid= 1;
+								printf("O utente %d tem covid positivo \n \n",id_pessoal);
+							}
+							else{
+								printf("O utente %d nao tem covid \n", id_pessoal);
+								postos[posto_pessoal] = 0; //posto fica livre
+								utentes[id_pessoal].saiu = 1; //sai do centro
+							}
+						}
+					}
+	
+				}
+
+				if(utentes[id_pessoal].posto_testagem == 0){ //Não está no ponto de testagem -------------------------
+
+					//verificar se já esperou o tempo nas configurações 
+					if(tempo_no_centro >= config.TEMPO_ATENDIMENTO){
+
+						//verificar se o posto está cheio, se nao estiver entra com o semaforo
+						sem_wait(&fila_normal); //===================================================================================
+						int x;
+						for(x = 0; x < config.NUMERO_POSTOS_TESTAGEM; x++){
+							if(postos[x] == 0){
+							postos[x] = 1;
+							posto_pessoal = x;
+							utentes[id_pessoal].posto_testagem = 1;
+							printf("Utente %d entrou no posto de testagem %d \n",id_pessoal,x);
+							numUtentesFilaNormal--;
+							break;
+							}
+						}
+						sem_post(&fila_normal); //===================================================================================
+					}
+
+				}
+			}
+		}
+		else{
+			printf("Utente %d saiu. \n",id_pessoal);
+			pthread_cancel(pthread_self()); 
+		}
+		
+	}
+
 }
 
 
@@ -350,10 +501,11 @@ void criasocket(){
 	}
 	puts("Conexão aceite");
 
+	//XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 	//Receber mensagem do cliente
 	while( (read_size = recv(client_sock , client_message , 2000 , 0)) > 0 )
 	{	
-
+		
 		int opcao = atoi(client_message);
 
 
@@ -368,11 +520,6 @@ void criasocket(){
 		switch(opcao){
 			case 1 : {  //Iniciar simulação
 
-
-				//Função para gerar aleatoriamente um ou mais utentes com threads 
-				pthread_t thread;
-				pthread_create(&thread, NULL, &gerar_utentes, NULL);
-				
 				//Enviar o evento da abertura do centro
 				write(client_sock , client_message , strlen(client_message)+1);
 				break;
@@ -380,9 +527,20 @@ void criasocket(){
 
 			case 2: { //Continuar a simulacao 
 				
+				int numero_random = random_num(1,1);
+				int i = 0;
+				for (i = 0; i < numero_random; i++){
+					pthread_t thread;
+					pthread_create(&thread, NULL, &gerar_utentes, NULL);
+				}		
+				
+				//Função para gerar aleatoriamente um ou mais utentes com threads 
+
+				write(client_sock , client_message , strlen(client_message)+1);
+				imprime_utentes();
 				tempo_universal++;
 
-				//Função para entrar no centro
+	
 				break;
 			}
 			case 3: { //Pausar a simulacao
@@ -443,8 +601,25 @@ int main(int argc, char **argv) {
 	}
 	printf ("\n");
 
+
+	printf("Load postos de testagem \n");
+	int x;
+	for(x = 0; x < config.NUMERO_POSTOS_TESTAGEM; x++){
+		postos[x] = 0;
+		printf("Posto %d criado com valor %d \n",x,postos[x]);
+	}
+
+	sem_init(&fila_normal,0,1);
+	sem_init(&fila_prio,0,1);
+	sem_init(&fila_isolamento_normal,0,1);
+	sem_init(&fila_isolamento_prio,0,1);
+
 	criasocket();
 
+	sem_destroy(&fila_normal);
+	sem_destroy(&fila_prio);
+	sem_destroy(&fila_isolamento_normal);
+	sem_destroy(&fila_isolamento_prio);
 	
 
 }
